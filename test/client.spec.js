@@ -5,6 +5,10 @@ const getFilesForOptions = require('./utils/utils').getFilesForOptions;
 const expectedFiles = require('./utils/expected-files');
 const angularFiles = require('../generators/client/files-angular').files;
 const reactFiles = require('../generators/client/files-react').files;
+const constants = require('../generators/generator-constants');
+
+const ANGULAR = constants.SUPPORTED_CLIENT_FRAMEWORKS.ANGULAR;
+const REACT = constants.SUPPORTED_CLIENT_FRAMEWORKS.REACT;
 
 describe('JHipster client generator', () => {
     describe('generate client with React', () => {
@@ -18,8 +22,7 @@ describe('JHipster client generator', () => {
                     enableTranslation: true,
                     nativeLanguage: 'en',
                     languages: ['fr'],
-                    clientFramework: 'react',
-                    useSass: true
+                    clientFramework: REACT
                 })
                 .on('end', done);
         });
@@ -27,7 +30,6 @@ describe('JHipster client generator', () => {
             assert.noFile(expectedFiles.maven);
             assert.file(
                 getFilesForOptions(reactFiles, {
-                    useSass: true,
                     enableTranslation: true,
                     serviceDiscoveryType: false,
                     authenticationType: 'jwt',
@@ -51,8 +53,7 @@ describe('JHipster client generator', () => {
                     enableTranslation: true,
                     nativeLanguage: 'en',
                     languages: ['fr'],
-                    clientFramework: 'angularX',
-                    useSass: true
+                    clientFramework: ANGULAR
                 })
                 .on('end', done);
         });
@@ -64,7 +65,6 @@ describe('JHipster client generator', () => {
             assert.file(expectedFiles.i18nJson);
             assert.file(
                 getFilesForOptions(angularFiles, {
-                    useSass: true,
                     enableTranslation: true,
                     serviceDiscoveryType: false,
                     authenticationType: 'jwt',
@@ -91,8 +91,7 @@ describe('JHipster client generator', () => {
                     enableTranslation: true,
                     nativeLanguage: 'en',
                     languages: ['fr'],
-                    clientFramework: 'angularX',
-                    useSass: true
+                    clientFramework: ANGULAR
                 })
                 .on('end', done);
         });
@@ -104,7 +103,6 @@ describe('JHipster client generator', () => {
             assert.file(expectedFiles.i18nJson);
             assert.file(
                 getFilesForOptions(angularFiles, {
-                    useSass: true,
                     enableTranslation: true,
                     serviceDiscoveryType: false,
                     authenticationType: 'jwt',

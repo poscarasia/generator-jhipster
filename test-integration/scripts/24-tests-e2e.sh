@@ -11,6 +11,11 @@ if [ -a src/main/docker/couchbase.yml ]; then
     sleep 20
     docker ps -a
 fi
+if [ -a src/main/docker/cassandra.yml ]; then
+    docker-compose -f src/main/docker/cassandra.yml up -d
+    sleep 30
+    docker ps -a
+fi
 
 #-------------------------------------------------------------------------------
 # Functions
@@ -66,32 +71,43 @@ if [ "$JHI_RUN_APP" == 1 ]; then
     if [[ "$JHI_APP" == *"uaa"* ]]; then
         cd "$JHI_FOLDER_UAA"
         java \
-            -jar app.war \
+            -jar app.jar \
             --spring.profiles.active=dev \
             --logging.level.ROOT=OFF \
             --logging.level.org.zalando=OFF \
             --logging.level.io.github.jhipster=OFF \
-            --logging.level.io.github.jhipster.sample=OFF \
-            --logging.level.io.github.jhipster.travis=OFF &
+            --logging.level.io.github.jhipster.sample=OFF &
         sleep 80
     fi
 
     cd "$JHI_FOLDER_APP"
-    java \
-        -jar app.war \
-        --spring.profiles.active="$JHI_PROFILE" \
-        --logging.level.ROOT=OFF \
-        --logging.level.org.zalando=OFF \
-        --logging.level.org.springframework.web=ERROR \
-        --logging.level.io.github.jhipster=OFF \
-        --logging.level.io.github.jhipster.sample=OFF \
-        --logging.level.io.github.jhipster.travis=OFF &
-    echo $! > .pid
+    # Run the app packaged as war/jar
+    if [[ "$JHI_WAR" == 1 ]]; then
+        java \
+            -jar app.war \
+            --spring.profiles.active="$JHI_PROFILE" \
+            --logging.level.ROOT=OFF \
+            --logging.level.org.zalando=OFF \
+            --logging.level.org.springframework.web=ERROR \
+            --logging.level.io.github.jhipster=OFF \
+            --logging.level.io.github.jhipster.sample=OFF &
+            echo $! > .pidRunApp
+    else
+        java \
+            -jar app.jar \
+            --spring.profiles.active="$JHI_PROFILE" \
+            --logging.level.ROOT=OFF \
+            --logging.level.org.zalando=OFF \
+            --logging.level.org.springframework.web=ERROR \
+            --logging.level.io.github.jhipster=OFF \
+            --logging.level.io.github.jhipster.sample=OFF &
+        echo $! > .pidRunApp
+    fi
     sleep 40
 
     launchCurlOrProtractor
-    result=$?
-    kill $(cat .pid)
+    resultRunApp=$?
+    kill $(cat .pidRunApp)
 
-    exit $result
+    exit $((resultRunApp))
 fi

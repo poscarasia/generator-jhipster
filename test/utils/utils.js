@@ -2,25 +2,35 @@ const path = require('path');
 const os = require('os');
 const shelljs = require('shelljs');
 const assert = require('yeoman-assert');
+const fse = require('fs-extra');
+const fs = require('fs');
+
 const Generator = require('../../generators/generator-base');
 const constants = require('../../generators/generator-constants');
 
 const DOCKER_DIR = constants.DOCKER_DIR;
+const FAKE_BLUEPRINT_DIR = path.join(__dirname, '../templates/fake-blueprint');
 
 module.exports = {
     getFilesForOptions,
     shouldBeV3DockerfileCompatible,
     getJHipsterCli,
-    createBlueprintMockForSubgen,
-    testInTempDir
+    testInTempDir,
+    copyBlueprint,
+    copyFakeBlueprint,
+    lnYeoman
 };
 
 function getFilesForOptions(files, options, prefix, excludeFiles) {
     const generator = options;
+    generator.debug = () => {};
+    const outputPathCustomizer = generator.outputPathCustomizer || (file => file);
+
+    const destFiles = Generator.prototype.writeFilesToDisk.call(generator, files, undefined, true, prefix).map(outputPathCustomizer);
     if (excludeFiles === undefined) {
-        return Generator.prototype.writeFilesToDisk(files, generator, true, prefix);
+        return destFiles;
     }
-    return Generator.prototype.writeFilesToDisk(files, generator, true, prefix).filter(file => !excludeFiles.includes(file));
+    return destFiles.filter(file => !excludeFiles.includes(file));
 }
 
 function shouldBeV3DockerfileCompatible(databaseType) {
@@ -62,43 +72,21 @@ function testInTempDir(cb) {
     console.log(`current cwd: ${process.cwd()}`);
 }
 
-function createBlueprintMockForSubgen(parentSubGenerator) {
-    return class extends parentSubGenerator {
-        constructor(args, opts) {
-            super(args, { fromBlueprint: true, ...opts }); // fromBlueprint variable is important
-            const jhContext = (this.jhipsterContext = this.options.jhipsterContext);
-            if (!jhContext) {
-                this.error("This is a JHipster blueprint and should be used only like 'jhipster --blueprint ...')}");
-            }
-            this.configOptions = jhContext.configOptions || {};
-        }
+function copyBlueprint(sourceDir, packagePath, ...blueprintNames) {
+    const nodeModulesPath = `${packagePath}/node_modules`;
+    fse.ensureDirSync(nodeModulesPath);
+    blueprintNames.forEach(blueprintName => {
+        fse.copySync(sourceDir, `${nodeModulesPath}/generator-jhipster-${blueprintName}`);
+    });
+}
 
-        get initializing() {
-            return super._initializing();
-        }
+function copyFakeBlueprint(packagePath, ...blueprintName) {
+    copyBlueprint(FAKE_BLUEPRINT_DIR, packagePath, ...blueprintName);
+}
 
-        get prompting() {
-            return super._prompting();
-        }
-
-        get configuring() {
-            return super._configuring();
-        }
-
-        get default() {
-            return super._default();
-        }
-
-        get writing() {
-            return super._writing();
-        }
-
-        get install() {
-            return super._install();
-        }
-
-        get end() {
-            return super._end();
-        }
-    };
+function lnYeoman(packagePath) {
+    const nodeModulesPath = `${packagePath}/node_modules`;
+    fse.ensureDirSync(nodeModulesPath);
+    fs.symlinkSync(path.join(__dirname, '../../node_modules/yeoman-generator/'), `${nodeModulesPath}/yeoman-generator`);
+    fs.symlinkSync(path.join(__dirname, '../../node_modules/yeoman-environment/'), `${nodeModulesPath}/yeoman-environment`);
 }

@@ -1,5 +1,5 @@
 <%#
- Copyright 2013-2019 the original author or authors from the JHipster project.
+ Copyright 2013-2020 the original author or authors from the JHipster project.
 
  This file is part of the JHipster project, see https://jhipster.github.io/
  for more information.
@@ -16,9 +16,9 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -%>
-package <%=packageName%>.web.rest;
+package <%= packageName %>.web.rest;
 
-import <%=packageName%>.security.oauth2.OAuth2AuthenticationService;
+import <%= packageName %>.security.oauth2.OAuth2AuthenticationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -55,8 +55,8 @@ public class AuthResource {
     /**
      * Authenticates a user setting the access and refresh token cookies.
      *
-     * @param request  the HttpServletRequest holding - among others - the headers passed from the client.
-     * @param response the HttpServletResponse getting the cookies set upon successful authentication.
+     * @param request  the {@link HttpServletRequest} holding - among others - the headers passed from the client.
+     * @param response the {@link HttpServletResponse} getting the cookies set upon successful authentication.
      * @param params   the login params (username, password, rememberMe).
      * @return the access token of the authenticated user. Will return an error code if it fails to authenticate the user.
      */
@@ -70,8 +70,8 @@ public class AuthResource {
     /**
      * Logout current user deleting his cookies.
      *
-     * @param request  the HttpServletRequest holding - among others - the headers passed from the client.
-     * @param response the HttpServletResponse getting the cookies set upon successful authentication.
+     * @param request  the {@link HttpServletRequest} holding - among others - the headers passed from the client.
+     * @param response the {@link HttpServletResponse} getting the cookies set upon successful authentication.
      * @return an empty response entity.
      */
     @RequestMapping(value = "/logout", method = RequestMethod.POST)
